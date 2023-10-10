@@ -7,7 +7,7 @@
   "version": "2.0.0-alpha.1",
   "description": "An isomorphic JavaScript client for interacting with the WordPress REST API",
   "main": "wpapi.js",
-  "types": "index.d.ts",
+  "types": "wpapi.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/wp-api/node-wpapi.git"

@@ -6,32 +6,32 @@ declare module 'wpapi' {
         nonce?: string;
         transport?: Transport;
         routes?: Routes;
-    };
-    type Transport = Record<string, any>;
+    }
+    type Transport = Record<string, any>
     type Credentials = {
         username: string;
         password: string;
         nonce?: string;
-    };
-    type HeadersDict = Record<string, string>;
-    type RouteOptions = Record<string, any>;
-    type Routes = Record<string, any>;
-    interface WPRequest {
-        [x: string]: any;
-    };
+    }
+    type HeadersDict = Record<string, string>
+    type RouteOptions = Record<string, any>
+    type Routes = Record<string, any>
     interface EndpointHandler {
-        [routeOrAction: string]: WPRequest;
-    };
-    export interface WPAPI extends EndpointHandler {
+        param(name: string, value: any): EndpointHandler;
+    }
+    interface WPAPI extends EndpointHandler {
         constructor(options: Options): WPAPI;
         transport(transport: Transport): WPAPI;
-        url(url: string): WPRequest;
-        root(relativePath: string): WPRequest;
+        url(url: string): any;
+        root(relativePath: string): any;
         setHeaders(headers: string | HeadersDict): WPAPI;
         auth(credentials: Credentials): WPAPI;
         registerRoute(namespace: string, restBase: string, options: RouteOptions): WPAPI;
-        bootstrap(routes: Routes): WPAPI;
-        namespace(namespace: string): EndpointHandler;
-        site(endpoint: string, routes: Route[]): WPAPI;
-    };
-};
+        bootstrap(routes: Routes): any;
+        namespace(namespace: string): any;
+        site(endpoint: string, routes: Routes[]): WPAPI;
+        discover(url: string): WPAPI;
+    }
+    var defaultExport: WPAPI
+    export default defaultExport;
+}
