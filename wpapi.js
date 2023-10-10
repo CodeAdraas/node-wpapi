@@ -404,17 +404,46 @@ WPAPI.site = ( endpoint, routes ) => {
  * library is unable to parse the provided endpoint.
  */
 WPAPI.discover = ( url ) => {
-    // Use WPAPI.site to make a request using the defined transport
-    const req = WPAPI.site(url).root().param('rest_route', '/');
-    return req.get().then(apiRootJSON => {
-        const routes = apiRootJSON.routes;
-        return new WPAPI({
-            // Derive the endpoint from the self link for the / root
-            endpoint: routes['/']._links.self,
-            // Bootstrap returned WPAPI instance with the discovered routes
-            routes: routes
-        });
-    });
+	// local placeholder for API root URL
+	let endpoint;
+
+	// Try HEAD request first, for smaller payload: use WPAPI.site to produce
+	// a request that utilizes the defined HTTP transports
+	const req = WPAPI.site( url ).root();
+	return req.headers()
+		.catch( () => {
+			// On the hypothesis that any error here is related to the HEAD request
+			// failing, provisionally try again using GET because that method is
+			// more widely supported
+			return req.get();
+		} )
+		// Inspect response to find API location header
+		.then( autodiscovery.locateAPIRootHeader )
+		.then( ( apiRootURL ) => {
+			// Set the function-scope variable that will be used to instantiate
+			// the bound WPAPI instance,
+			endpoint = apiRootURL;
+
+			// then GET the API root JSON object
+			return WPAPI.site( apiRootURL ).root().get();
+		} )
+		.then( ( apiRootJSON ) => {
+			// Instantiate & bootstrap with the discovered methods
+			return new WPAPI( {
+				endpoint: endpoint,
+				routes: apiRootJSON.routes,
+			} );
+		} )
+		.catch( ( err ) => {
+			/* eslint-disable no-console */
+			console.error( err );
+			if ( endpoint ) {
+				console.warn( 'Endpoint detected, proceeding despite error...' );
+				console.warn( 'Binding to ' + endpoint + ' and assuming default routes' );
+				return new WPAPI.site( endpoint );
+			}
+			throw new Error( 'Autodiscovery failed' );
+		} );
 };
 
 module.exports = WPAPI;
