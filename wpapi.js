@@ -391,4 +391,30 @@ WPAPI.site = ( endpoint, routes ) => {
 	} );
 };
 
+/**
+ * Take an arbitrary WordPress site, deduce the WP REST API root endpoint, query
+ * that endpoint, and parse the response JSON. Use the returned JSON response
+ * to instantiate a WPAPI instance bound to the provided site.
+ *
+ * @memberof! WPAPI
+ * @static
+ * @param {string} url A URL within a REST API-enabled WordPress website
+ * @returns {Promise} A promise that resolves to a configured WPAPI instance bound
+ * to the deduced endpoint, or rejected if an endpoint is not found or the
+ * library is unable to parse the provided endpoint.
+ */
+WPAPI.discover = ( url ) => {
+    // Use WPAPI.site to make a request using the defined transport
+    const req = WPAPI.site(url).root().param('rest_route', '/');
+    return req.get().then(apiRootJSON => {
+        const routes = apiRootJSON.routes;
+        return new WPAPI({
+            // Derive the endpoint from the self link for the / root
+            endpoint: routes['/']._links.self,
+            // Bootstrap returned WPAPI instance with the discovered routes
+            routes: routes
+        });
+    });
+};
+
 module.exports = WPAPI;
