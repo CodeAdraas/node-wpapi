@@ -30,7 +30,7 @@ declare module 'wpapi' {
         bootstrap(routes: Routes): any;
         namespace(namespace: string): any;
         site(endpoint: string, routes: Routes[]): WPAPI;
-        discover(url: string): WPAPI;
+        discover(url: string): Promise<WPAPI>;
     }
     var defaultExport: WPAPI
     export default defaultExport;
